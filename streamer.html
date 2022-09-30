@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer</title>
+</head>
+<body>
+    <h1>Sreamer</h1>
+    <video width="640" height="480" autoplay></video>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const video = document.querySelector('video')
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: 640,
+                height: 480
+            },
+        }).then(stream => video.srcObject = stream)
+
+        // 60 fps send base64 webcam image to server
+        setInterval(() => {
+            
+            const canvas = document.createElement('canvas')
+            canvas.width = 640
+            canvas.height = 480
+
+            const ctx = canvas.getContext('2d')
+            ctx.drawImage(video, 0, 0, 640, 480)
+
+            const data = canvas.toDataURL('image/jpeg', 0.5)
+
+            socket.emit('streaming', data)
+        }, 1000 / 60)
+
+    </script>
+</body>
+</html>
